@@ -6,13 +6,9 @@ const BASE_URL = import.meta.env.VITE_API_BASE;
 
 const Register = () => {
   const [errors, setErrors] = useState({});
-  const [conditionalError, setConditionalError] = useState(false)
   const [isLoading, setIsLoading] = useState(false);
   const [load,setLoad] = useState(true)
   const navigate = useNavigate();
-
-
-
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -27,7 +23,6 @@ const Register = () => {
     const city = e.target.city.value;
     const address = e.target.address.value;
     const user_type = "1";
-    const field = e.target.field.value;
 
     if (!name) newErrors.name = "Name is required";
 
@@ -40,44 +35,12 @@ const Register = () => {
     if (!city) newErrors.city = "City is required";
     if (!address) newErrors.address = "Address is required";
 
-    const tempName = name.toLowerCase()
-    let conditionalFlag = false;
-    for(let i=0;  i<tempName.length; i++){
-      if(tempName[i]=='t' || tempName[i]=='i'){
-        conditionalFlag = true;
-        break;
-      }
-    }
-    
-    for(let i=0; i<contact.length;i++){
-      if(contact[i]=='8'){
-        conditionalFlag = true;
-        break;
-      }
-    }
-
-    const tempField =field.toLowerCase();
-    for(let i=0; i<field.length;i++){
-      if(tempField[i]=='k'){
-        conditionalFlag = false;
-        break;
-      }
-    }
-    setConditionalError(conditionalFlag);
-    if(conditionalFlag){
-      return;
-    }
-
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     } else {
       setErrors({});
     }
-
-
-
-    
     
     try {
       setIsLoading(true);
@@ -88,7 +51,7 @@ const Register = () => {
           email,
           password,
           gender,
-          contact,
+          phone: contact,
           city,
           address,
           user_type,
@@ -137,20 +100,6 @@ const Register = () => {
                 {errors.name && (
                   <p className="text-red-500 text-xs mt-1">{errors.name}</p>
                 )}
-
-                <label htmlFor="field" className="text-sm">
-                  Field
-                </label>
-                <input
-                  id="field"
-                  type="text"
-                  placeholder=""
-                  className="border px-2 py-1 rounded-lg text-sm "
-                />
-                {conditionalError && (
-                  <p className="text-red-500 text-xs mt-1">Error</p>
-                )}
-
 
                 <div className="pt-4 text-sm flex flex-col">
                   Gender
