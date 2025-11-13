@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FaTrashAlt, FaCheckCircle } from "react-icons/fa";
+import LeftNav from "../applicationUserComponents/LeftNav"
+import TopNav from "../applicationUserComponents/TopNav"
 
 const BASE_URL = import.meta.env.VITE_API_BASE;
 
@@ -202,7 +204,9 @@ const DonationRequest = () => {
 
   return (
     <div className="min-h-screen flex items-center bg-gray-50">
+    <LeftNav/>
       <div className="bg-white rounded-lg p-8 w-full max-w-5xl mx-auto shadow-md">
+      <TopNav/>
         <h2 className="text-2xl font-bold mb-6 text-gray-800">
           Submit Donation Request
         </h2>

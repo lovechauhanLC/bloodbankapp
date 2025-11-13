@@ -1,0 +1,22 @@
+  useEffect(() => {
+    const fetchDonors = async () => {
+      try {
+        const res = await axios.get("https://blood-bank.veldev.com/Laravel-Blood-Bank/public/api/searchDonars?limit=10&page=1");
+        if (res?.data?.response) {
+          const formatted = res.data.response.map((d, index) => ({
+            id: d.donorId || index,
+            name: d.fullName,
+            bloodGroup: d.bloodGroup,
+            contactNumber: d.mobileNumber,
+            state: d.stateName,
+            city: d.cityName,
+            address: d.address
+          }));
+          setDonors(formatted);
+        }
+      } catch (error) {
+        console.log("Error fetching donors:", error);
+      }
+    };
+    fetchDonors();
+  }, []);

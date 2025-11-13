@@ -8,12 +8,12 @@ const Login = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const token = sessionStorage.getItem("token");
-    if (token) {
-      navigate("/bloodBanks");
-    }
-  }, [navigate]);
+  // useEffect(() => {
+  //   const token = sessionStorage.getItem("token");
+  //   if(token){
+  //     navigate('/bloodBanks')
+  //   }
+  // }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -28,10 +28,10 @@ const Login = () => {
     }
 
     try {
-      const { data } = await axios.post(
-        `${BASE_URL}/login`,
-        { email, password }
-      );
+      const { data } = await axios.post(`${BASE_URL}/login`, {
+        email,
+        password,
+      });
 
       if (data?.error?.response === "fail") {
         setError("Invalid Credentials");
@@ -40,25 +40,30 @@ const Login = () => {
 
       const token = data?.response?.token;
       const user = data?.response?.user;
+      
 
       if (!token || !user) {
         setError("Unexpected server response");
         return;
       }
 
-      const userType =
-        user.userType === 1
-          ? "Regular User"
-          : user.userType === 2
-          ? "Donor"
-          : "Admin";
+      const userType = user.userType;
 
       sessionStorage.setItem("token", JSON.stringify(token));
       sessionStorage.setItem("id", JSON.stringify(user.userId));
       sessionStorage.setItem("name", JSON.stringify(user.name));
       sessionStorage.setItem("user", JSON.stringify(userType));
 
-      navigate("/bloodBanks");
+      navigate("/bloodBanks")
+
+      // if (userType == 1) {
+      //   navigate("/bloodBanks");
+      // } 
+      // else if (userType == 2) {
+      //   navigate("/donorList");
+      // } else {
+      //   navigate("/bloodBanks");
+      // }
     } catch (err) {
       console.error("Login error:", err);
       setError("Network error. Please try again.");

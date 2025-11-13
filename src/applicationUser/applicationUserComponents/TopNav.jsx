@@ -10,15 +10,27 @@ const TopNav = () => {
     try {
       const storedName = sessionStorage.getItem("name");
       const storedId = sessionStorage.getItem("id");
-      const storedRole = sessionStorage.getItem("role");
+      const storedRole = sessionStorage.getItem("user");
 
-       const cleanedName = storedName ? storedName.replace(/^"|"$/g, "") : "Unknown";
+
+      const cleanedName = storedName ? storedName.replace(/^"|"$/g, "") : "Unknown";
       const cleanedId = storedId ? storedId.replace(/^"|"$/g, "") : "-";
       const cleanedRole = storedRole ? storedRole.replace(/^"|"$/g, "") : "User";
+      
+
+      let userRole ="" ;
+
+      if(cleanedRole == 1 ){
+        userRole = "Application User"
+      }else if(cleanedRole == 2){
+        userRole = "Blood Bank User"
+      }else{
+        userRole = "Admin User"
+      }
 
       setName(cleanedName);
       setId(cleanedId);
-      setRole(cleanedRole);
+      setRole(userRole);
     } catch (error) {
       console.error("Error reading session storage:", error);
     }

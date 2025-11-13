@@ -1,12 +1,29 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const LeftNav = () => {
   const navigate = useNavigate();
-  const role = sessionStorage.getItem("role");
-  const isBloodBankUser = role === "Blood Bank User" || role === "Admin";
+  const location = useLocation();
 
-  const handleNavigate = (path) => navigate(path);
+  const [role, setRole] = useState("1");
+
+  useEffect(() => {
+    const storedRole = sessionStorage.getItem("user");
+    const cleanedRole = storedRole ? storedRole.replace(/^"|"$/g, "") : "1";
+    setRole(cleanedRole);
+  }, []);
+
+  console.log(role)
+  const handleNavigate = (path) => {
+    console.log("entered");
+    
+    navigate(path)
+  };
+
+  const isActive = (path) =>
+    location.pathname === path
+      ? "bg-[#e73e32] text-white"
+      : "text-black hover:bg-[#e73e32] hover:text-white";
 
   const handleLogout = () => {
     sessionStorage.clear();
@@ -22,44 +39,86 @@ const LeftNav = () => {
         </div>
 
         <div className="flex flex-col gap-2 mt-10 px-5">
-          {isBloodBankUser ? (
-            <>
+
+          {/* APPLICATION USER (role = 1) */}
+          {role === "1" && (
+            <div>
               <button
-                onClick={() => handleNavigate("/donors")}
-                className="text-left hover:bg-[#e73e32] hover:text-white transition duration-300 h-[50px] rounded px-4"
+                onClick={() => handleNavigate("/bloodBanks")}
+                className={`text-left h-[50px] rounded px-4 transition ${isActive("/bloodBanks")}`}
               >
-                Donors
+                Blood Banks
               </button>
+
+              <button
+                onClick={() => handleNavigate("/searchDonor")}
+                className={`text-left h-[50px] rounded px-4 transition ${isActive("/searchDonor")}`}
+              >
+                Search Donors
+              </button>
+
               <button
                 onClick={() => handleNavigate("/donationRequest")}
-                className="text-left hover:bg-[#e73e32] hover:text-white transition duration-300 h-[50px] rounded px-4"
+                className={`text-left h-[50px] rounded px-4 transition ${isActive("/donationRequest")}`}
               >
                 Donation Requests
               </button>
+
+              <button
+                onClick={() => handleNavigate("/registerDonor")}
+                className={`text-left h-[50px] rounded px-4 transition ${isActive("/registerDonor")}`}
+              >
+                Register as Donor
+              </button>
+            </div>
+          )}
+
+          
+          {role === "2" && (
+            <>
+              <button
+                onClick={() => handleNavigate("/donorList")}
+                className={`text-left h-[50px] rounded px-4 transition ${isActive("/donorList")}`}
+              >
+                Donors
+              </button>
+
+              <button
+                onClick={() => handleNavigate("/requestApproval")}
+                className={`text-left h-[50px] rounded px-4 transition ${isActive("/donationRequest")}`}
+              >
+                Donation Requests
+              </button>
+
               <button
                 onClick={() => handleNavigate("/bloodInventory")}
-                className="text-left hover:bg-[#e73e32] hover:text-white transition duration-300 h-[50px] rounded px-4"
+                className={`text-left h-[50px] rounded px-4 transition ${isActive("/bloodInventory")}`}
               >
                 Blood Inventory
               </button>
             </>
-          ) : (
+          )}
+
+          {/* SYSTEM ADMIN (role = 0) */}
+          {role === "0" && (
             <>
               <button
-                onClick={() => handleNavigate("/bloodBanks")}
-                className="text-left hover:bg-[#e73e32] hover:text-white transition duration-300 h-[50px] rounded px-4"
+                onClick={() => handleNavigate("/admin/bloodBanks")}
+                className={`text-left h-[50px] rounded px-4 transition ${isActive("/admin/bloodBanks")}`}
               >
                 Blood Banks
               </button>
+
               <button
-                onClick={() => handleNavigate("/searchDonor")}
-                className="text-left hover:bg-[#e73e32] hover:text-white transition duration-300 h-[50px] rounded px-4"
+                onClick={() => handleNavigate("/admin/donors")}
+                className={`text-left h-[50px] rounded px-4 transition ${isActive("/admin/donors")}`}
               >
-                Search Donors
+                Donors
               </button>
+
               <button
-                onClick={() => handleNavigate("/donationRequest")}
-                className="text-left hover:bg-[#e73e32] hover:text-white transition duration-300 h-[50px] rounded px-4"
+                onClick={() => handleNavigate("/admin/donationRequests")}
+                className={`text-left h-[50px] rounded px-4 transition ${isActive("/admin/donationRequests")}`}
               >
                 Donation Requests
               </button>
@@ -69,14 +128,6 @@ const LeftNav = () => {
       </div>
 
       <div className="flex flex-col gap-4 px-5 mb-8">
-        {!isBloodBankUser && (
-          <button
-            onClick={() => handleNavigate("/registerDonor")}
-            className="h-10 bg-[#e73e32] rounded text-white font-medium"
-          >
-            Register as Donor
-          </button>
-        )}
         <button
           onClick={handleLogout}
           className="h-10 border-2 border-[#e73e32] rounded text-[#e73e32] font-semibold"
