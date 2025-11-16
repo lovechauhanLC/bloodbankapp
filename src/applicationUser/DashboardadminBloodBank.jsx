@@ -1,7 +1,7 @@
 import React from 'react'
 import LeftNav from './applicationUserComponents/LeftNav'
 import TopNav from './applicationUserComponents/TopNav'
-import AdminBloodBank from './applicationUserPages/adminBloodBank'
+import AdminBloodBank from './applicationUserPages/AdminBloodBank'
 
 const DashboardadminBloodBank = () => {
   return (

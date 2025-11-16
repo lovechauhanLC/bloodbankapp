@@ -1,7 +1,7 @@
 import React from 'react'
 import LeftNav from './applicationUserComponents/LeftNav'
 import TopNav from './applicationUserComponents/TopNav'
-import AdminDonationRequests from './applicationUserPages/adminDonationRequests'
+import AdminDonationRequests from './applicationUserPages/AdminDonationRequests'
 
 const DashboardadminDonationRequests = () => {
   return (

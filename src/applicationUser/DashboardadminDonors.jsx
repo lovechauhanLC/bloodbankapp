@@ -1,7 +1,7 @@
 import React from 'react'
 import LeftNav from './applicationUserComponents/LeftNav'
 import TopNav from './applicationUserComponents/TopNav'
-import AdminDonors from './applicationUserPages/adminDonors'
+import AdminDonors from './applicationUserPages/AdminDonors'
 
 const DashboardadminDonors = () => {
   return (
