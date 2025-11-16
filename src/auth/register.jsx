@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 
@@ -8,10 +9,41 @@ const Register = () => {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [load,setLoad] = useState(true)
+  const [states, setStates] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [selectedState, setSelectedState] = useState("");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    axios.get(`${BASE_URL}/getStates`)
+      .then(res => {
+        if (res.data.response) setStates(res.data.response);
+      })
+      .catch(err => console.log("States API error", err));
+  }, []);
+
+  const handleStateChange = async (e) => {
+    const stateId = e.target.value;
+    setSelectedState(stateId);
+    setDistricts([]);
+
+    try {
+      const form = new URLSearchParams();
+      form.append("state_id", stateId);
+
+      const res = await axios.post(`${BASE_URL}/getDistricts`, form, {
+        headers: { "Content-Type": "application/x-www-form-urlencoded" }
+      });
+
+      if (res.data.response) setDistricts(res.data.response);
+    } catch (error) {
+      console.log("Districts API error", error);
+    }
+  };
 
   async function handleSubmit(e) {
     e.preventDefault();
+    console.log("Form submitted");
 
     let newErrors = {};
 
@@ -19,21 +51,28 @@ const Register = () => {
     const email = e.target.email.value;
     const password = e.target.password.value;
     const gender = e.target.gender.value;
-    const contact = e.target.contact.value;
+    const contact = e.target.phone.value.trim();
+    const phone = contact;
     const city = e.target.city.value;
     const address = e.target.address.value;
+    const state = selectedState;
+    const district = e.target.district.value;
     const user_type = "1";
 
+    console.log("Collected values:", { name, email, password, gender, contact, phone, city, address, state, district, user_type });
+
     if (!name) newErrors.name = "Name is required";
+    if (!email) newErrors.email = "Email is required";
 
     if (password.length < 6)
       newErrors.password = "Password must be at least 6 characters long";
 
-    if (contact.length != 10)
-      newErrors.contact = "Contact must be at least 10 digits";
+    if (!contact || contact.length !== 10) newErrors.contact = "Contact must be exactly 10 digits";
 
     if (!city) newErrors.city = "City is required";
     if (!address) newErrors.address = "Address is required";
+    if (!state) newErrors.state = "State is required";
+    if (!district) newErrors.district = "District is required";
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -44,26 +83,44 @@ const Register = () => {
     
     try {
       setIsLoading(true);
+      const formData = new URLSearchParams();
+      formData.append("name", name);
+      formData.append("email", email);
+      formData.append("password", password);
+      formData.append("gender", gender);
+      formData.append("phone", phone);
+      formData.append("city", city);
+      formData.append("state", state);
+      formData.append("district", district);
+      formData.append("address", address);
+      formData.append("user_type", user_type);
+
+      console.log("Sending data to API:", formData.toString());
+
       const res = await axios.post(
         `${BASE_URL}/registerApplicationUser`,
+        formData,
         {
-          name,
-          email,
-          password,
-          gender,
-          phone: contact,
-          city,
-          address,
-          user_type,
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+          }
         }
       );
+
+      console.log("API Response:", res.data);
 
       setTimeout(() => {
         setIsLoading(false);
         navigate("/login");
       }, 2000);
     } catch (error) {
-      console.log("Error in logging: ", error);
+      console.log("Error occurred while registering");
+      if (error.response) {
+        console.log("API ERROR: ", error.response.data);
+        alert(JSON.stringify(error.response.data));
+      } else {
+        console.log("Error: ", error);
+      }
     }
   }
 
@@ -93,6 +150,7 @@ const Register = () => {
                 </label>
                 <input
                   id="name"
+                  name="name"
                   type="text"
                   placeholder="Enter your full name"
                   className="border px-2 py-1 rounded-lg text-sm "
@@ -110,6 +168,7 @@ const Register = () => {
                       value="1"
                       type="radio"
                       className="mr-1"
+                      required
                     />
                     <label htmlFor="male" className="mt-2">
                       Male
@@ -120,6 +179,7 @@ const Register = () => {
                       value="2"
                       type="radio"
                       className="ml-4 mr-1"
+                      required
                     />
                     <label htmlFor="female" className="mt-2">
                       Female
@@ -131,6 +191,7 @@ const Register = () => {
                 </label>
                 <input
                   id="email"
+                  name="email"
                   type="email"
                   placeholder="Enter your email"
                   className="border px-2 py-1 rounded-lg text-sm"
@@ -143,6 +204,7 @@ const Register = () => {
                 </label>
                 <input
                   id="contact"
+                  name="phone"
                   type="text"
                   placeholder="Enter your contact number"
                   className="border px-2 py-1 rounded-lg text-sm"
@@ -150,11 +212,13 @@ const Register = () => {
                 {errors.contact && (
                   <p className="text-red-500 text-xs mt-1">{errors.contact}</p>
                 )}
+
                 <label htmlFor="city" className="pt-4 text-sm">
                   City
                 </label>
                 <input
                   id="city"
+                  name="city"
                   type="text"
                   placeholder="Enter your city"
                   className="border px-2 py-1 rounded-lg text-sm"
@@ -162,11 +226,53 @@ const Register = () => {
                 {errors.city && (
                   <p className="text-red-500 text-xs mt-1">{errors.city}</p>
                 )}
+
+                <label htmlFor="state" className="pt-4 text-sm">
+                  State
+                </label>
+                <select
+                  id="state"
+                  name="state"
+                  value={selectedState}
+                  onChange={handleStateChange}
+                  className="border px-2 py-1 rounded-lg text-sm"
+                >
+                  <option value="">Select State</option>
+                  {states.map((st) => (
+                    <option key={st.stateId} value={st.stateId}>
+                      {st.name}
+                    </option>
+                  ))}
+                </select>
+                {errors.state && (
+                  <p className="text-red-500 text-xs mt-1">{errors.state}</p>
+                )}
+
+                <label htmlFor="district" className="pt-4 text-sm">
+                  District
+                </label>
+                <select
+                  id="district"
+                  name="district"
+                  className="border px-2 py-1 rounded-lg text-sm"
+                >
+                  <option value="">Select District</option>
+                  {districts.map((dt) => (
+                    <option key={dt.districtId} value={dt.districtId}>
+                      {dt.name}
+                    </option>
+                  ))}
+                </select>
+                {errors.district && (
+                  <p className="text-red-500 text-xs mt-1">{errors.district}</p>
+                )}
+
                 <label htmlFor="address" className="pt-4 text-sm">
                   Address
                 </label>
                 <input
                   id="address"
+                  name="address"
                   type="text"
                   placeholder="Enter your address"
                   className="border px-2 py-1 rounded-lg text-sm"
@@ -179,6 +285,7 @@ const Register = () => {
                 </label>
                 <input
                   id="password"
+                  name="password"
                   type="password"
                   placeholder="Create your password"
                   className="border px-2 py-1 rounded-lg text-sm"

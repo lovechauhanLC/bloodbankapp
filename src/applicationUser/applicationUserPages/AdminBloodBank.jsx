@@ -20,6 +20,9 @@ const AdminBloodBank = () => {
   const [bloodTypesAvailable, setBloodTypesAvailable] = useState([]);
 
   const [isEditing, setIsEditing] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
+  const [selectedBank, setSelectedBank] = useState(null);
+  const [popupEditMode, setPopupEditMode] = useState(false);
   const [editId, setEditId] = useState(null);
 
   const [page, setPage] = useState(1);
@@ -31,7 +34,7 @@ const AdminBloodBank = () => {
   const fetchBloodBanks = async () => {
     try {
       const res = await axios.get(`${BASE_URL}/bloodBanks?page=${page}`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
       setBloodBanks(res.data.response || []);
       setTotalPages(res.data.pagination?.totalPages || 1);
@@ -93,8 +96,8 @@ const AdminBloodBank = () => {
       await axios.post(`${BASE_URL}/addBloodBank`, params, {
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "application/x-www-form-urlencoded"
-        }
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
       });
 
       setShowAddForm(false);
@@ -124,8 +127,8 @@ const AdminBloodBank = () => {
       await axios.post(`${BASE_URL}/updateBloodBank/${editId}`, params, {
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "application/x-www-form-urlencoded"
-        }
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
       });
 
       setShowAddForm(false);
@@ -139,7 +142,7 @@ const AdminBloodBank = () => {
   const handleDelete = async (id) => {
     try {
       await axios.delete(`${BASE_URL}/deleteBloodBank/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
       fetchBloodBanks();
     } catch (err) {
@@ -147,7 +150,7 @@ const AdminBloodBank = () => {
     }
   };
 
-  const bloodTypes = ["A+","A-","B+","B-","O+","O-","AB+","AB-","ABO"];
+  const bloodTypes = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-", "ABO"];
 
   return (
     <div className="p-6">
@@ -174,8 +177,12 @@ const AdminBloodBank = () => {
             <table className="min-w-full border-collapse">
               <thead className="bg-[#EEF2FF]">
                 <tr>
-                  <th className="px-4 py-3 text-left font-semibold">Blood Bank</th>
-                  <th className="px-4 py-3 text-left font-semibold">Contact Number</th>
+                  <th className="px-4 py-3 text-left font-semibold">
+                    Blood Bank
+                  </th>
+                  <th className="px-4 py-3 text-left font-semibold">
+                    Contact Number
+                  </th>
                   <th className="px-4 py-3 text-left">City</th>
                   <th className="px-4 py-3 text-left">State</th>
                   <th className="px-4 py-3 text-left">Address</th>
@@ -192,16 +199,22 @@ const AdminBloodBank = () => {
                     <td className="px-4 py-3">{bb.state}</td>
                     <td className="px-4 py-3">{bb.address}</td>
 
-                    <td className="px-4 py-3 flex items-center gap-3 justify-center">
+                    <td
+                      className="px-4 py-3 flex items-center gap-3 justify-center cursor-pointer"
+                      onClick={() => {
+                        setSelectedBank(bb);
+                        setShowPopup(true);
+                      }}
+                    >
                       <button
-                        onClick={() => handleDelete(bb.bloodBankId)}
+                        onClick={(e) => e.stopPropagation()}
                         className="text-red-600 text-xl hover:scale-110 transition"
                       >
                         🗑️
                       </button>
 
                       <button
-                        onClick={() => startEdit(bb)}
+                        onClick={(e) => e.stopPropagation()}
                         className="text-black text-xl hover:scale-110 transition"
                       >
                         ✏️
@@ -257,50 +270,81 @@ const AdminBloodBank = () => {
             <div className="grid grid-cols-2 gap-6">
               <div>
                 <label className="font-medium">Name of the Blood Bank</label>
-                <input type="text" className="w-full border px-3 py-2 rounded mt-1"
-                  value={bank_name} onChange={(e) => setBankName(e.target.value)} />
+                <input
+                  type="text"
+                  className="w-full border px-3 py-2 rounded mt-1"
+                  value={bank_name}
+                  onChange={(e) => setBankName(e.target.value)}
+                />
               </div>
 
               <div>
                 <label className="font-medium">Phone Number</label>
-                <input type="text" className="w-full border px-3 py-2 rounded mt-1"
-                  value={phone} onChange={(e) => setPhone(e.target.value)} />
+                <input
+                  type="text"
+                  className="w-full border px-3 py-2 rounded mt-1"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                />
               </div>
 
               <div>
                 <label className="font-medium">Email</label>
-                <input type="email" className="w-full border px-3 py-2 rounded mt-1"
-                  value={email} onChange={(e) => setEmail(e.target.value)} />
+                <input
+                  type="email"
+                  className="w-full border px-3 py-2 rounded mt-1"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
               </div>
 
               <div>
                 <label className="font-medium">Address Line</label>
-                <input type="text" className="w-full border px-3 py-2 rounded mt-1"
-                  value={address} onChange={(e) => setAddress(e.target.value)} />
+                <input
+                  type="text"
+                  className="w-full border px-3 py-2 rounded mt-1"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                />
               </div>
 
               <div>
                 <label className="font-medium">State</label>
-                <input type="text" className="w-full border px-3 py-2 rounded mt-1"
-                  value={state} onChange={(e) => setState(e.target.value)} />
+                <input
+                  type="text"
+                  className="w-full border px-3 py-2 rounded mt-1"
+                  value={state}
+                  onChange={(e) => setState(e.target.value)}
+                />
               </div>
 
               <div>
                 <label className="font-medium">District</label>
-                <input type="text" className="w-full border px-3 py-2 rounded mt-1"
-                  value={district} onChange={(e) => setDistrict(e.target.value)} />
+                <input
+                  type="text"
+                  className="w-full border px-3 py-2 rounded mt-1"
+                  value={district}
+                  onChange={(e) => setDistrict(e.target.value)}
+                />
               </div>
 
               <div>
                 <label className="font-medium">City</label>
-                <input type="text" className="w-full border px-3 py-2 rounded mt-1"
-                  value={city} onChange={(e) => setCity(e.target.value)} />
+                <input
+                  type="text"
+                  className="w-full border px-3 py-2 rounded mt-1"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                />
               </div>
 
               <div>
                 <label className="font-medium">Type of Blood Bank</label>
-                <select className="w-full border px-3 py-2 rounded mt-1"
-                  value={type} onChange={(e) => setType(e.target.value)}>
+                <select
+                  className="w-full border px-3 py-2 rounded mt-1"
+                  value={type}
+                  onChange={(e) => setType(e.target.value)}
+                >
                   <option value="">Select</option>
                   <option value="Public">Public</option>
                   <option value="Private">Private</option>
@@ -310,14 +354,22 @@ const AdminBloodBank = () => {
               </div>
 
               <div>
-                <label className="font-medium">License/Certification Number</label>
-                <input type="text" className="w-full border px-3 py-2 rounded mt-1"
-                  value={license_no} onChange={(e) => setLicenseNo(e.target.value)} />
+                <label className="font-medium">
+                  License/Certification Number
+                </label>
+                <input
+                  type="text"
+                  className="w-full border px-3 py-2 rounded mt-1"
+                  value={license_no}
+                  onChange={(e) => setLicenseNo(e.target.value)}
+                />
               </div>
             </div>
 
             <div className="mt-8">
-              <label className="font-medium mb-2 block">Blood Types Available</label>
+              <label className="font-medium mb-2 block">
+                Blood Types Available
+              </label>
               <div className="grid grid-cols-5 gap-3">
                 {bloodTypes.map((bg) => (
                   <label key={bg} className="flex items-center gap-2">
@@ -352,6 +404,241 @@ const AdminBloodBank = () => {
           <div className="flex justify-between text-sm mt-10 text-gray-600">
             <p>2023 Developed and Maintained by Velocity.</p>
             <p>Technical Support by Velocity.</p>
+          </div>
+        </div>
+      )}
+
+      {showPopup && selectedBank && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-xl flex justify-center items-center z-50">
+          <div className="bg-white rounded-lg shadow-xl p-8 w-[700px] relative">
+            <button
+              onClick={() => setShowPopup(false)}
+              className="absolute top-4 right-4 text-2xl font-bold text-gray-600 hover:text-black"
+            >
+              ✖
+            </button>
+            <h2 className="text-2xl font-semibold mb-6">Blood Bank Details</h2>
+
+            <div className="space-y-4">
+              {/* Bank Name */}
+              <div className="flex justify-between items-center">
+                <p className="font-semibold">Blood Bank:</p>
+                {!popupEditMode ? (
+                  <p>{selectedBank.bankName}</p>
+                ) : (
+                  <input
+                    className="border px-2 py-1 rounded w-1/2"
+                    value={bank_name}
+                    onChange={(e) => setBankName(e.target.value)}
+                  />
+                )}
+              </div>
+
+              {/* Phone */}
+              <div className="flex justify-between items-center">
+                <p className="font-semibold">Phone:</p>
+                {!popupEditMode ? (
+                  <p>{selectedBank.phone}</p>
+                ) : (
+                  <input
+                    className="border px-2 py-1 rounded w-1/2"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                  />
+                )}
+              </div>
+
+              {/* Email */}
+              <div className="flex justify-between items-center">
+                <p className="font-semibold">Email:</p>
+                {!popupEditMode ? (
+                  <p>{selectedBank.email}</p>
+                ) : (
+                  <input
+                    className="border px-2 py-1 rounded w-1/2"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                )}
+              </div>
+
+              {/* Address */}
+              <div className="flex justify-between items-center">
+                <p className="font-semibold">Address:</p>
+                {!popupEditMode ? (
+                  <p>{selectedBank.address}</p>
+                ) : (
+                  <input
+                    className="border px-2 py-1 rounded w-1/2"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                  />
+                )}
+              </div>
+
+              {/* City */}
+              <div className="flex justify-between items-center">
+                <p className="font-semibold">City:</p>
+                {!popupEditMode ? (
+                  <p>{selectedBank.city}</p>
+                ) : (
+                  <input
+                    className="border px-2 py-1 rounded w-1/2"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                  />
+                )}
+              </div>
+
+              {/* State */}
+              <div className="flex justify-between items-center">
+                <p className="font-semibold">State:</p>
+                {!popupEditMode ? (
+                  <p>{selectedBank.state}</p>
+                ) : (
+                  <input
+                    className="border px-2 py-1 rounded w-1/2"
+                    value={state}
+                    onChange={(e) => setState(e.target.value)}
+                  />
+                )}
+              </div>
+
+              {/* District */}
+              <div className="flex justify-between items-center">
+                <p className="font-semibold">District:</p>
+                {!popupEditMode ? (
+                  <p>{selectedBank.district}</p>
+                ) : (
+                  <input
+                    className="border px-2 py-1 rounded w-1/2"
+                    value={district}
+                    onChange={(e) => setDistrict(e.target.value)}
+                  />
+                )}
+              </div>
+
+              {/* Type */}
+              <div className="flex justify-between items-center">
+                <p className="font-semibold">Type:</p>
+                {!popupEditMode ? (
+                  <p>{selectedBank.type}</p>
+                ) : (
+                  <select
+                    className="border px-2 py-1 rounded w-1/2"
+                    value={type}
+                    onChange={(e) => setType(e.target.value)}
+                  >
+                    <option value="">Select</option>
+                    <option value="Public">Public</option>
+                    <option value="Private">Private</option>
+                    <option value="Hospital Based">Hospital Based</option>
+                    <option value="Independent">Independent</option>
+                  </select>
+                )}
+              </div>
+
+              {/* License Number */}
+              <div className="flex justify-between items-center">
+                <p className="font-semibold">License No:</p>
+                {!popupEditMode ? (
+                  <p>{selectedBank.licenseNo}</p>
+                ) : (
+                  <input
+                    className="border px-2 py-1 rounded w-1/2"
+                    value={license_no}
+                    onChange={(e) => setLicenseNo(e.target.value)}
+                  />
+                )}
+              </div>
+
+              {/* Blood Types */}
+              <div className="flex flex-col gap-2">
+                <p className="font-semibold">Blood Types Available:</p>
+
+                {!popupEditMode ? (
+                  <p>{selectedBank.bloodTypesAvailable}</p>
+                ) : (
+                  <div className="grid grid-cols-4 gap-2">
+                    {bloodTypes.map((bg) => (
+                      <label key={bg} className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={bloodTypesAvailable.includes(bg)}
+                          onChange={() => handleCheckboxChange(bg)}
+                        />
+                        {bg}
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex justify-center gap-6 mt-8">
+              {!popupEditMode ? (
+                <>
+                  <button
+                    onClick={() => {
+                      setBankName(selectedBank.bankName || "");
+                      setPhone(selectedBank.phone || "");
+                      setEmail(selectedBank.email || "");
+                      setAddress(selectedBank.address || "");
+                      setCity(selectedBank.city || "");
+                      setState(selectedBank.state || "");
+                      setDistrict(selectedBank.district || "");
+                      setType(selectedBank.type || "");
+                      setLicenseNo(selectedBank.licenseNo || "");
+
+                      if (selectedBank.bloodTypesAvailable) {
+                        setBloodTypesAvailable(
+                          selectedBank.bloodTypesAvailable
+                            .split(",")
+                            .map((v) => v.trim())
+                        );
+                      } else {
+                        setBloodTypesAvailable([]);
+                      }
+
+                      setPopupEditMode(true);
+                    }}
+                    className="px-6 py-2 bg-blue-600 text-white rounded"
+                  >
+                    Edit
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      handleDelete(selectedBank.bloodBankId);
+                      setShowPopup(false);
+                    }}
+                    className="px-6 py-2 bg-red-600 text-white rounded"
+                  >
+                    Delete
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={async () => {
+                      await handleUpdateBloodBank();
+                      setPopupEditMode(false);
+                      setShowPopup(false);
+                    }}
+                    className="px-6 py-2 bg-green-600 text-white rounded"
+                  >
+                    Save
+                  </button>
+
+                  <button
+                    onClick={() => setPopupEditMode(false)}
+                    className="px-6 py-2 bg-gray-400 text-white rounded"
+                  >
+                    Cancel
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}

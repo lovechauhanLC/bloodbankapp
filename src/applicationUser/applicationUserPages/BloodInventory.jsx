@@ -19,6 +19,9 @@ const BloodInventory = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
 
+      console.log(res.data.response);
+      
+
       setInventory(res.data.response || []);
     } catch (err) {
       console.error("Fetch Inventory Error:", err);
@@ -71,21 +74,46 @@ const BloodInventory = () => {
             className="shadow rounded-lg p-6 bg-white flex justify-between"
           >
             <div>
-              <p className="text-gray-500 text-sm">Bags available</p>
+              <p className="text-gray-500 text-sm">"{item.bloodGroup}" Bags available</p>
               <p className="text-xl font-semibold">{item.totalQuantity} Bags</p>
             </div>
 
-            <div className="flex items-center">
-              <div className="w-12 h-12 bg-red-500 text-white flex items-center justify-center rounded-full text-lg font-bold">
-                {item.blood_group}
+            <div className="flex flex-col items-center">
+              <div className="relative flex items-center justify-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 64 64"
+                  className="w-14 h-14"
+                >
+                  <path
+                    d="M32 2C32 2 12 26 12 40C12 53 21 62 32 62C43 62 52 53 52 40C52 26 32 2 32 2Z"
+                    fill="#e6372f"
+                  />
+                  <text
+                    x="32"
+                    y="38"
+                    dominantBaseline="middle"
+                    textAnchor="middle"
+                    fill="white"
+                    fontSize="14"
+                    fontWeight="bold"
+                    style={{ pointerEvents: 'none' }}
+                  >
+                    {item.blood_group}
+                  </text>
+                </svg>
               </div>
+
+              <p className="mt-2 text-sm font-semibold text-gray-700">
+                {item.blood_group}
+              </p>
             </div>
           </div>
         ))}
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-20 flex justify-end">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex justify-end">
           <div className="w-[40%] bg-white h-full p-8 shadow-lg">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-[22px] font-semibold">Add Blood Bags</h2>
