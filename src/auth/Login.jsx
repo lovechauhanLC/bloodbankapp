@@ -49,12 +49,19 @@ const Login = () => {
 
       const userType = user.userType;
 
+
       sessionStorage.setItem("token", JSON.stringify(token));
       sessionStorage.setItem("id", JSON.stringify(user.userId));
       sessionStorage.setItem("name", JSON.stringify(user.name));
       sessionStorage.setItem("user", JSON.stringify(userType));
 
-      navigate("/bloodBanks")
+      if (userType == 1) {
+        navigate("/bloodBanks");
+      } else if (userType == 2) {
+        navigate("/donorList");
+      } else {
+        navigate("/admin/bloodBanks");
+      }
 
       // if (userType == 1) {
       //   navigate("/bloodBanks");
